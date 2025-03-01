@@ -1,0 +1,6 @@
+✅ Frontend: HTML/CSS/JavaScript and deployment on Vercel
+✅ Backend: Flask for deployment on render
+✅ AI: Mistral 7B Instruct on Hugging Face for translation
+✅ Speech Recognition: Web Speech API (browser-native)
+✅ Audio Playback: Web Speech API for Text-to-Speech (TTS)
+✅ Deployment: Configure CORS in Flask (Vercel and render)

@@ -1,0 +1,10 @@
+flask
+flask-cors
+requests
+transformers
+torch
+gunicorn
+python-dotenv
+langchain
+langchain-groq
+flask-limiter
