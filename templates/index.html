@@ -5,55 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Healthcare Translation Web App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet"> <!-- To load the animate on scroll CSS -->
+
 </head>
+
 <body>
-    <div class="container">
-        <h1>Welcome to the Healthcare Translation App</h1>
-        
-        <div class="language-selection">
+  <div class="container" data-aos="zoom-in">
+    <div class="background">
+        <h1 class="typewriter" data-aos="fade">Welcome to the Healthcare Translation App</h1>
+
+        <div class="language-selection" data-aos="fade-up" data-aos-delay="200">
             <div class="lang-labels">
-                <label for="input-lang">🌍 Input Language</label>
-                <label for="output-lang">🌍 Output Language</label>
+                <label for="input-lang" data-aos="fade-right" data-aos-delay="400">🌍 Input Language</label>
+                <label for="output-lang" data-aos="fade-left" data-aos-delay="400">🌍 Output Language</label>
             </div>
+
             <div class="lang-selects">
-                <select id="input-lang">
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
+                <select id="input-lang" data-aos="fade-right" data-aos-delay="500">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
                 </select>
-                
-                <button id="swap-languages">🔄</button>
-                
-                <select id="output-lang">
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                    <option value="en">English</option>
+
+                <button id="swap-languages" data-aos="zoom-in" data-aos-delay="600">🔄</button>
+
+                <select id="output-lang" data-aos="fade-left" data-aos-delay="700">
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="en">English</option>
                 </select>
-            </div>
-        </div>
-        
-        <div class="content">
-            <div class="left-section">
-                <button id="start-recording">🎤 Start Recording</button>
-                <span id="recording-status" class="hidden">🔴 Recording...</span>
-                <button id="clear-text">✖ Clear</button>
-                <div class="transcript-box">
-                    <label>📝 Transcribed Text</label>
-                    <p id="transcribed-text"></p>
-                </div>
-            </div>
-            
-            <div class="right-section">
-                <button id="playback">🔊 Playback</button>
-                <span id="loading-indicator" class="hidden">⏳ Translating...</span>
-                <div class="translation-box">
-                    <label>📜 Translated Text</label>
-                    <p id="translated-text"></p>
-                </div>
             </div>
         </div>
     </div>
-    
+
+    <div class="content" data-aos="flip-up" data-aos-delay="800">
+      <div class="left-section" data-aos="slide-right" data-aos-delay="900">
+        <button id="start-recording" data-aos="fade-up" data-aos-delay="1000">🎤 Start Recording</button>
+        <span id="recording-status" class="hidden" data-aos="fade-in" data-aos-delay="1100">🔴 Recording...</span>
+        <button id="clear-text" data-aos="fade-up" data-aos-delay="1200">✖ Clear</button>
+
+        <div class="transcript-box" data-aos="zoom-in-up" data-aos-delay="1300">
+          <label>📝 Transcribed Text</label>
+          <p id="transcribed-text"></p>
+        </div>
+      </div>
+
+      <div class="right-section" data-aos="slide-left" data-aos-delay="900">
+        <button id="playback" data-aos="fade-up" data-aos-delay="1000">🔊 Playback</button>
+        <span id="loading-indicator" class="hidden" data-aos="fade-in" data-aos-delay="1100">⏳ Translating...</span>
+
+        <div class="translation-box" data-aos="zoom-in-up" data-aos-delay="1300">
+          <label>📜 Translated Text</label>
+          <p id="translated-text"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>  <!-- For animate on scroll functionality -->
 </body>
 </html>

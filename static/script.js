@@ -124,3 +124,42 @@ document.getElementById("playback").addEventListener("click", function () {
 
 // Initialize the output language restriction on page load
 updateOutputOptions();
+
+
+window.addEventListener('load', () => {
+    AOS.init({
+        duration: 2500,
+        once: false, // animations repeat
+        offset: 100,
+        easing: 'ease-in-out',
+        delay: 100
+    });
+
+    AOS.refresh();
+
+    const header = document.querySelector('.typewriter');
+    let hasTyped = false; // prevent retyping
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !hasTyped) {
+                // Get character length of header
+                const charCount = header.textContent.trim().length;
+
+                // Dynamically set width and animation steps
+                header.style.width = `${charCount}ch`;
+                header.style.animation = `typing 3.5s steps(${charCount}, end), blink 0.75s step-end infinite`;
+
+                header.classList.add('animate');
+                hasTyped = true;
+                observer.unobserve(header);
+            }
+        });
+    }, {
+        threshold: 0.5
+    });
+
+    if (header) {
+        observer.observe(header);
+    }
+});

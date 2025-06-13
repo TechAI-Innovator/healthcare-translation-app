@@ -7,6 +7,7 @@ body {
     background-size: cover;
     margin: 0;
     padding: 20px;
+    overflow-x: hidden;
 }
 
 .container {
@@ -16,11 +17,65 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-x: hidden;
 }
 
 .language-selection {
     margin-bottom: 20px;
 }
+
+/* Language Selection Labels */
+.lang-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #333;
+}
+
+/* Language Selects + Swap Button */
+.lang-selects {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Dropdown styling */
+.lang-selects select {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    transition: border 0.2s ease;
+}
+
+.lang-selects select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Swap Button */
+#swap-languages {
+    padding: 8px 12px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+#swap-languages:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
 
 .content {
     display: flex;
@@ -46,14 +101,15 @@ button {
     border: none;
     cursor: pointer;
     border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
-    background: #0056b3;
+    background-color: #0056b3;
 }
 
 .transcript-box, .translation-box {
-    height: 200px;
+    height: 350px;
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 10px;
@@ -65,13 +121,166 @@ button:hover {
     display: none;
 }
 
+
+.typewriter {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 2em;
+    margin-bottom: 20px;
+    border-right: 2px solid rgba(0, 0, 0, 0.75);
+    visibility: hidden;
+    max-width: 100%;
+    width: 0; 
+}
+
+.typewriter.animate {
+    visibility: visible;
+    border-color: rgba(0, 0, 0, 0.75);
+}
+
+/* Add `forwards` to preserve final state after typing */
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    0%, 100% { border-color: transparent; }
+    50% { border-color: rgba(0, 0, 0, 0.75); }
+}
+
+
+
+@media (max-width: 1300px) {
+    body {
+        background: #ffff;
+    }
+
+    .container {
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("/static/background.jpg");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        opacity: 0.4; /* 👈 Adjust this value as needed (0 = full opacity, 1 = transparent) */
+        z-index: -1;
+    }
+
+    .typewriter {
+        font-size: 1.4em;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 1.4em;
+        margin: 10px 0;
+        padding: 0 5px;
+    }
+}
+
 @media (max-width: 600px) {
     .content {
         flex-direction: column;
     }
 
-    body {
+    .container {
+        padding: 0;
+    }
+
+    .container::before{
+        background: #ffff;
+    }
+
+    .background {
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+        padding: 0% 5%;
+        margin-bottom: 20px;
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .background::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("/static/background.jpg");
         background-position: top;
-        background-size: 110% auto;
+        background-repeat: no-repeat;
+        background-size: cover;
+        opacity: 0.4; /* 👈 Adjust this value as needed (0 = full opacity, 1 = transparent) */
+        z-index: -1;
+    }
+
+    .typewriter {
+        font-size: 1.05em;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 1.05em;
+        margin: 10px 0;
+        padding: 0 2px;
+    }
+
+} 
+
+@media (max-width: 420px) {
+    .background {    
+        padding: 1% 1%;
+    }
+
+    .typewriter {
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Language Selection Labels */
+    .lang-labels {
+        font-size: 0.8rem;
+    }
+
+    /* Language Selects + Swap Button */
+    .lang-selects {
+        gap: 5px;
+    }
+
+    /* Dropdown styling */
+    .lang-selects select {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* Swap Button */
+    #swap-languages {
+        padding: 6px 10px;
+        font-size: 1rem;
+    }
+
+    .typewriter {
+        font-size: 1em;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 1em;
+        margin: 2px 0;
+        padding: 0 2px;
     }
 }
