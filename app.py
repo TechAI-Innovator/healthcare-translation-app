@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from langchain_groq import ChatGroq
+from datetime import datetime, timedelta, timezone
 
 # Load environment variables
 load_dotenv()
@@ -15,8 +16,7 @@ app = Flask(__name__)
 limiter = Limiter(get_remote_address, app=app, default_limits=["5 per second"])
 
 # Get Groq API key from environment variables
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 # Initialize Groq model
 llm = ChatGroq(
@@ -73,7 +73,7 @@ def translate():
         response = llm.invoke(prompt)
 
         # Ensure response format is correct
-        translated_text = response.strip() if hasattr(response, "content") else response("text", "").strip()
+        translated_text = response.content.strip() if hasattr(response, "content") else response.get("text", "").strip()
 
         print(f"Generated response length: {len(translated_text)} characters")  # Debugging statement
         return jsonify({"translated_text": translated_text})
@@ -81,6 +81,15 @@ def translate():
     except Exception as e:
         print("Internal server error occurred")  # Log internally
         return jsonify({"error": "Internal server error"}), 500  # Do not expose system details
+    
+
+@app.route("/time")
+def time_teller():
+    timed = timedelta(hours=6)
+    date_time = datetime.now() - timed
+    time = date_time.strftime("%I:%M %p")
+    date_ = date_time.strftime("%Y/%d/%m")
+    return jsonify({"message" : f"The time is {time} ... date {date_}"})
     
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)  # Use port 5000 instead of 80
