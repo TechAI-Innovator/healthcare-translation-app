@@ -13,7 +13,7 @@ A real-time multilingual communication platform designed for healthcare environm
 
 ## 🎥 Demo Video
 
-📺 [Watch the demo](https://github.com/TechAI-Innovator/healthcare-translation-app/assets/demo-video.mp4)  
+📺 [Watch the demo](https://youtu.be/LBvh76OQXZM)
 _A short walkthrough showcasing real-time translation, voice interaction, and multilingual capabilities._
 
 ---
