@@ -20,7 +20,7 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 # Initialize Groq model
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model="qwen/qwen3.8-27b",
     temperature=0.3,
     max_tokens=1000,
     timeout=30,
@@ -38,8 +38,15 @@ def index():
 
 @app.route("/translate", methods=["POST"])
 def translate():
-    data = request.json
-    text = sanitize_text(data.get("text", "").strip())
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "A JSON request body is required"}), 400
+
+    raw_text = data.get("text", "")
+    if not isinstance(raw_text, str):
+        return jsonify({"error": "Text must be a string"}), 400
+
+    text = sanitize_text(raw_text.strip()).strip()
     source_lang = data.get("source_lang", "en")
     target_lang = data.get("target_lang", "es")
 
@@ -78,9 +85,9 @@ def translate():
         print(f"Generated response length: {len(translated_text)} characters")  # Debugging statement
         return jsonify({"translated_text": translated_text})
     
-    except Exception as e:
-        print("Internal server error occurred")  # Log internally
-        return jsonify({"error": "Internal server error"}), 500  # Do not expose system details
+    except Exception:
+        app.logger.exception("Translation request failed")
+        return jsonify({"error": "Translation service failed. Check the server logs for details."}), 500
     
 
 @app.route("/time")

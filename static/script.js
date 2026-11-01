@@ -32,34 +32,108 @@ const transcribedText = document.getElementById("transcribed-text");
 const translatedText = document.getElementById("translated-text");
 const recordingStatus = document.getElementById("recording-status");
 
-let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.interimResults = true;
-recognition.continuous = true;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let restartTimer = null;
 
 let finalTranscript = ""; // Store finalized transcription
 let debounceTimer = null; // Timer for limiting API calls
 
-startRecordingBtn.addEventListener("click", function () {
-    if (startRecordingBtn.dataset.recording === "false") {
-        recognition.lang = inputLangSelect.value; // Set recognition language
-        recognition.start();
-        startRecordingBtn.innerHTML = "⏹️ Stop Recording";
-        startRecordingBtn.dataset.recording = "true";
-        recordingStatus.classList.remove("hidden");
-    } else {
-        recognition.stop();
-        startRecordingBtn.innerHTML = "🎤 Start Recording";
-        startRecordingBtn.dataset.recording = "false";
-        recordingStatus.classList.add("hidden");
-    }
-});
+function setRecordingState(isRecording, message = "") {
+    startRecordingBtn.dataset.recording = String(isRecording);
+    startRecordingBtn.innerHTML = isRecording ? "⏹️ Stop Recording" : "🎤 Start Recording";
+    recordingStatus.textContent = message || (isRecording ? "🔴 Recording..." : "");
+    recordingStatus.classList.toggle("hidden", !isRecording && !message);
+}
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.interimResults = true;
+    recognition.continuous = true;
+
+    startRecordingBtn.addEventListener("click", function () {
+        if (startRecordingBtn.dataset.recording === "false") {
+            const recognitionLanguages = { en: "en-US", es: "es-ES", fr: "fr-FR" };
+            recognition.lang = recognitionLanguages[inputLangSelect.value] || inputLangSelect.value;
+            try {
+                recognition.start();
+                setRecordingState(true);
+            } catch (error) {
+                setRecordingState(false, "Could not start speech recognition. Please try again.");
+                console.error("Could not start speech recognition:", error);
+            }
+        } else {
+            clearTimeout(restartTimer);
+            setRecordingState(false);
+            recognition.stop();
+        }
+    });
+
+    recognition.onresult = function (event) {
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript + " ";
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+
+        transcribedText.textContent = finalTranscript + interimTranscript;
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            sendToBackendForTranslation(finalTranscript + interimTranscript);
+        }, 500);
+    };
+
+    recognition.onerror = function (event) {
+        const messages = {
+            "not-allowed": "Microphone access is blocked. Allow microphone access in your browser settings.",
+            "service-not-allowed": "Speech recognition is unavailable. Check your browser settings.",
+            "audio-capture": "No microphone was detected. Check your microphone and try again.",
+            network: "Speech recognition needs a network connection. Check your connection and try again.",
+            "language-not-supported": "Speech recognition does not support the selected language.",
+            "no-speech": "No speech detected. Speak clearly near your microphone."
+        };
+
+        if (event.error === "no-speech") {
+            setRecordingState(true, messages[event.error]);
+            return;
+        }
+        if (event.error === "aborted" && startRecordingBtn.dataset.recording === "false") {
+            return;
+        }
+
+        setRecordingState(false, messages[event.error] || `Speech recognition failed (${event.error}). Please try again.`);
+        console.error("Speech recognition error:", event.error);
+    };
+
+    recognition.onend = function () {
+        if (startRecordingBtn.dataset.recording === "true") {
+            restartTimer = setTimeout(() => {
+                if (startRecordingBtn.dataset.recording !== "true") return;
+                try {
+                    recognition.start();
+                } catch (error) {
+                    setRecordingState(false, "Speech recognition stopped unexpectedly. Please start again.");
+                    console.error("Could not restart speech recognition:", error);
+                }
+            }, 500);
+        }
+    };
+} else {
+    startRecordingBtn.disabled = true;
+    setRecordingState(false, "Speech recognition is not supported by this browser. Try a supported browser.");
+}
 
 // Function to send text to backend for real-time translation with debouncing
 async function sendToBackendForTranslation(text) {
     let inputLang = inputLangSelect.value;
     let outputLang = outputLangSelect.value;
+    text = text.trim();
 
-    if (!text) return;
+    if (!text || !/[\p{L}\p{N}]/u.test(text)) return;
 
     try {
         let response = await fetch("/translate", {
@@ -68,39 +142,17 @@ async function sendToBackendForTranslation(text) {
             body: JSON.stringify({ text: text, source_lang: inputLang, target_lang: outputLang }),
         });
 
-        let data = await response.json();
+        const data = await response.json();
+        if (!response.ok) {
+            translatedText.textContent = data.error || `Translation failed (${response.status}).`;
+            return;
+        }
         translatedText.textContent = data.translated_text || "Translation failed";
     } catch (error) {
-        translatedText.textContent = "Error in translation";
+        translatedText.textContent = "Could not reach the translation service. Check your connection and server.";
+        console.error("Translation request failed:", error);
     }
 }
-
-// Function to handle transcription and trigger translation
-recognition.onresult = function (event) {
-    let interimTranscript = "";
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript + " ";
-        } else {
-            interimTranscript += event.results[i][0].transcript;
-        }
-    }
-
-    transcribedText.textContent = finalTranscript + interimTranscript;
-
-    // Debounce translation requests to avoid excessive API calls
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-        sendToBackendForTranslation(finalTranscript + interimTranscript);
-    }, 500);
-};
-
-// Restart recognition on end (for continuous real-time experience)
-recognition.onend = function () {
-    if (startRecordingBtn.dataset.recording === "true") {
-        setTimeout(() => recognition.start(), 500); // Small delay before restarting
-    }
-};
 
 // Clear Text functionality
 document.getElementById("clear-text").addEventListener("click", function () {
